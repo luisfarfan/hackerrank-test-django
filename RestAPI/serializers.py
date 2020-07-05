@@ -20,6 +20,11 @@ class ActorModelSerializer(serializers.ModelSerializer):
         model = Actor
         fields = '__all__'
 
+    def update(self, instance, validated_data):
+        instance.avatar_url = validated_data['avatar_url']
+        instance.save()
+        return instance
+
 
 class RepoModelSerializer(serializers.ModelSerializer):
     class Meta:
@@ -33,12 +38,12 @@ class EventModelSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Event
-        fields = ('id', 'actor', 'repo', 'actor_event')
+        fields = '__all__'
 
 
 class EventDetailSerializer(serializers.ModelSerializer):
-    # actor = ActorSerializer(required=True)
-    # repo = RepoSerializer(required=True)
+    actor = ActorSerializer(write_only=True)
+    repo = RepoSerializer(write_only=True)
 
     class Meta:
         model = Event
@@ -48,7 +53,9 @@ class EventDetailSerializer(serializers.ModelSerializer):
         actor_data = validated_data.pop('actor')
         repo_data = validated_data.pop('repo')
         event = Event.objects.create(**validated_data)
-        actor = Actor.objects.create(event=event, **actor_data)
-        repo = Repo.objects.create(event=event, **repo_data)
+        actor = Actor.objects.create(**actor_data)
+        repo = Repo.objects.create(**repo_data)
+        event.actor = actor
+        event.repo = repo
         event.save()
         return event
