@@ -9,21 +9,36 @@ class ActorSerializer(serializers.Serializer):
     avatar_url = serializers.CharField()
 
 
-# class EventSerializer(serializers.Serializer):
-#     id = serializers.IntegerField()
-#     name = serializers.CharField()
-#     url = serializers.CharField()
-
-
 class RepoSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     name = serializers.CharField()
     url = serializers.CharField()
 
 
+class ActorModelSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Actor
+        fields = '__all__'
+
+
+class RepoModelSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Repo
+        fields = '__all__'
+
+
+class EventModelSerializer(serializers.ModelSerializer):
+    actor = ActorModelSerializer()
+    repo = RepoModelSerializer()
+
+    class Meta:
+        model = Event
+        fields = ('id', 'actor', 'repo', 'actor_event')
+
+
 class EventDetailSerializer(serializers.ModelSerializer):
-    actor = ActorSerializer(write_only=True, required=True)
-    repo = RepoSerializer(write_only=True, required=True)
+    # actor = ActorSerializer(required=True)
+    # repo = RepoSerializer(required=True)
 
     class Meta:
         model = Event
