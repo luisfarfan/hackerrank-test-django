@@ -57,7 +57,7 @@ class RestApiActorUpdateViewSet(generics.ListAPIView, APIView):
         serializer = self.serializer_class(instance, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save(**serializer.validated_data)
-        return Response(serializer.validated_data)
+        return Response(serializer.validated_data, status=status.HTTP_200_OK)
 
     # def list(self, request, *args, **kwargs):
     #     actor_id = kwargs.get('actor_id')
