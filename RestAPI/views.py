@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+from django.db.models.aggregates import Count
 from rest_framework import generics, status
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
@@ -21,7 +22,7 @@ class RestApiViewSet(generics.ListCreateAPIView, generics.RetrieveAPIView):
         serializer = EventDetailSerializer(data=request.data)
         if serializer.is_valid():
             event = serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(EventDetailSerializer(serializer.instance).data, status=status.HTTP_201_CREATED)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -47,9 +48,9 @@ class RestApiActorListViewSet(generics.ListAPIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-class RestApiActorUpdateViewSet(APIView):
+class RestApiActorUpdateViewSet(generics.ListAPIView, APIView):
     serializer_class = ActorModelSerializer
-    queryset = Actor.objects.all()
+    queryset = Actor.objects.annotate(count=Count('event__id')).all().order_by('count', 'event__created_at', '-login')
 
     def put(self, request, *args, **kwargs):
         instance = get_object_or_404(Actor, pk=request.data.get('id'))
@@ -57,3 +58,9 @@ class RestApiActorUpdateViewSet(APIView):
         serializer.is_valid(raise_exception=True)
         serializer.save(**serializer.validated_data)
         return Response(serializer.validated_data)
+
+    # def list(self, request, *args, **kwargs):
+    #     actor_id = kwargs.get('actor_id')
+    #     queryset = Event.objects.filter(actor__id=actor_id)
+    #     serializer = self.serializer_class(queryset, many=True)
+    #     return Response(serializer.data, status=status.HTTP_200_OK)
