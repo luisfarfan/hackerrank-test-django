@@ -15,7 +15,7 @@ class RestApiViewSet(generics.ListCreateAPIView, generics.RetrieveAPIView):
     serializer_class = EventModelSerializer
 
     def get_queryset(self):
-        queryset = Event.objects.all()
+        queryset = Event.objects.all().order_by('id')
         return queryset
 
     def post(self, request, *args, **kwargs):
